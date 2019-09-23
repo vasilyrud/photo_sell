@@ -1,0 +1,11 @@
+.vscode
+**/.DS_Store
+
+__pycache__/
+.pytest_cache/
+.coverage
+
+photo_sell/db.sqlite
+photo_sell/vars.py
+
+!*.gitkeep
