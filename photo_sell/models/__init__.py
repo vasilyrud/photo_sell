@@ -1,4 +1,4 @@
-from photo_sell.models.common import db
+from photo_sell.models.db import db
 
 def init_app(app):
     db.init_app(app)

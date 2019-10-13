@@ -1,4 +1,4 @@
-from photo_sell.models.common import db
+from photo_sell.models.db import db
 
 class Seller(db.Model):
     id = db.Column(db.Integer, primary_key=True)

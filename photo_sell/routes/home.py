@@ -1,6 +1,6 @@
 import flask
 
-from photo_sell.models.common import db
+from photo_sell.models.db import db
 from photo_sell.models.image import Image
 from photo_sell.models.seller import Seller
 

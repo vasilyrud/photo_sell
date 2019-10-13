@@ -1,6 +1,6 @@
 import flask
 
-from photo_sell.models.common import db
+from photo_sell.models.db import db
 from photo_sell.models.image import Image
 from photo_sell.models.seller import Seller
 
@@ -8,7 +8,7 @@ from photo_sell.routes.oauth import authorize_url, get_user_info, authenticate
 
 seller = flask.Blueprint('seller', __name__, template_folder='photo_sell.templates')
 
-def get_seller(google_id):
+def _get_seller(google_id):
 
     if not db.session.query(db.exists().where(
         Seller.google_id == google_id
@@ -21,7 +21,7 @@ def get_seller(google_id):
         Seller.google_id == google_id
     ).first()
 
-def add_stripe_id(stripe_id):
+def _add_stripe_id(stripe_id):
 
     cur_seller = db.session.query(Seller).filter(
         Seller.id == flask.session['seller_id']
@@ -64,7 +64,7 @@ def google_auth():
 
     google_id = id_token_data['sub']
 
-    cur_seller = get_seller(google_id)
+    cur_seller = _get_seller(google_id)
     flask.session['seller_id'] = cur_seller.id
     flask.session['google_id'] = google_id
 
@@ -100,7 +100,7 @@ def stripe_auth():
 
     stripe_id = user_info['stripe_user_id']
 
-    cur_seller = add_stripe_id(stripe_id)
+    cur_seller = _add_stripe_id(stripe_id)
     flask.session['stripe_id'] = stripe_id
 
     return flask.redirect('/')
