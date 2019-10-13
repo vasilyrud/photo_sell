@@ -1,14 +1,22 @@
+import io
 import flask
+
+from googleapiclient.discovery import build
+from googleapiclient.http import MediaIoBaseDownload
+from googleapiclient.errors import HttpError
 
 from photo_sell.models.db import db
 from photo_sell.models.image import Image
 from photo_sell.models.seller import Seller
 
 from photo_sell.routes.oauth import authorize_url, get_user_info, authenticate
+from photo_sell.routes.add_image_form import AddImageForm
 
 seller = flask.Blueprint('seller', __name__, template_folder='photo_sell.templates')
 
 def _get_seller(google_id):
+
+    # TODO: move to models
 
     if not db.session.query(db.exists().where(
         Seller.google_id == google_id
@@ -23,6 +31,8 @@ def _get_seller(google_id):
 
 def _add_stripe_id(stripe_id):
 
+    # TODO: move to models
+
     cur_seller = db.session.query(Seller).filter(
         Seller.id == flask.session['seller_id']
     ).first()
@@ -31,6 +41,19 @@ def _add_stripe_id(stripe_id):
     db.session.commit()
 
     return cur_seller
+
+def _download_image(drive_id):
+
+    service = build('drive', 'v3', developerKey=flask.current_app.config['GOOGLE_DRIVE_API_KEY'])
+    request = service.files().get_media(fileId=drive_id)
+
+    fh = io.BytesIO()
+    downloader = MediaIoBaseDownload(fh, request)
+
+    done = False
+    while done is False:
+        status, done = downloader.next_chunk()
+        print("Download %d%%." % int(status.progress() * 100))
 
 @seller.route('/google_login')
 def google_login():
@@ -46,6 +69,8 @@ def google_login():
 
 @seller.route('/google_auth')
 def google_auth():
+
+    # TODO: Disallow access to this URL
 
     user_info = get_user_info(
         'google',
@@ -76,6 +101,8 @@ def google_auth():
 @seller.route('/stripe_connect')
 def stripe_connect():
 
+    # TODO: Disallow access to this URL
+
     auth_url = authorize_url(
         'stripe',
         flask.current_app.config['STRIPE_AUTH_URL'],
@@ -87,6 +114,8 @@ def stripe_connect():
 
 @seller.route('/stripe_auth')
 def stripe_auth():
+
+    # TODO: Disallow access to this URL
 
     user_info = get_user_info(
         'stripe',
@@ -107,5 +136,22 @@ def stripe_auth():
 
 @seller.route('/logout')
 def logout():
+
+    # TODO: Disallow access to this URL
+
     flask.session.clear()
     return flask.redirect('/')
+
+@seller.route('/add_image', methods=('GET', 'POST'))
+def add_image():
+
+    # TODO: Disallow access to this URL
+
+    form = AddImageForm()
+
+    if form.validate_on_submit():
+        print('Form submitted:', form.drive_url.data)
+        # _parse_drive_url(form.drive_url.data)
+        # return flask.redirect('/')
+
+    return flask.render_template('add.html', form=form)

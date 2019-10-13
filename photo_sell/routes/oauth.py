@@ -48,6 +48,9 @@ def get_user_info(
 
     if flask.session[service + '_state'] != state:
         print('ERROR: state mismatch')
+
+        # TODO: This redirect will not work
+        # TODO: Use `url_for` instead of '/'
         flask.redirect('/')
 
     code = flask.request.args.get('code')
