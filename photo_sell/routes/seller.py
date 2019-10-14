@@ -14,49 +14,6 @@ from photo_sell.routes.add_image_form import AddImageForm
 
 seller = flask.Blueprint('seller', __name__, template_folder='photo_sell.templates')
 
-def _get_seller(google_id):
-
-    # TODO: move to models
-
-    if not db.session.query(db.exists().where(
-        Seller.google_id == google_id
-    )).scalar():
-        print('Creating user', google_id)
-        db.session.add(Seller(google_id=google_id))
-        db.session.commit()
-
-    return db.session.query(Seller).filter(
-        Seller.google_id == google_id
-    ).first()
-
-def _add_stripe_id(stripe_id):
-
-    # TODO: move to models
-
-    cur_seller = db.session.query(Seller).filter(
-        Seller.id == flask.session['seller_id']
-    ).first()
-
-    cur_seller.stripe_id = stripe_id
-    db.session.commit()
-
-    return cur_seller
-
-def _add_drive_image(drive_id):
-
-    # TODO: move to models
-
-    if not db.session.query(db.exists().where(
-        Image.drive_id == drive_id
-    )).scalar():
-        print('Creating image', drive_id)
-        db.session.add(Image(drive_id=drive_id, seller_id=flask.session['seller_id']))
-        db.session.commit()
-
-    return db.session.query(Image).filter(
-        Image.drive_id == drive_id
-    ).first()
-
 def _download_image(drive_id):
 
     service = build('drive', 'v3', developerKey=flask.current_app.config['GOOGLE_DRIVE_API_KEY'])
@@ -104,7 +61,7 @@ def google_auth():
 
     google_id = id_token_data['sub']
 
-    cur_seller = _get_seller(google_id)
+    cur_seller = Seller.add_google_id(google_id)
     flask.session['seller_id'] = cur_seller.id
     flask.session['google_id'] = google_id
 
@@ -144,7 +101,7 @@ def stripe_auth():
 
     stripe_id = user_info['stripe_user_id']
 
-    cur_seller = _add_stripe_id(stripe_id)
+    cur_seller = Seller.add_stripe_id(stripe_id, flask.session['seller_id'])
     flask.session['stripe_id'] = stripe_id
 
     return flask.redirect('/')
@@ -167,7 +124,7 @@ def add_image():
     if form.validate_on_submit():
         print('Form submitted:', form.drive_url.data)
 
-        cur_image = _add_drive_image(form.drive_id)
+        cur_image = Image.add_drive_image(form.drive_id, flask.session['seller_id'])
 
         return flask.redirect('/')
 

@@ -8,3 +8,17 @@ class Image(db.Model):
 
     def __repr__(self):
         return '<Image: %r>' % self.drive_id
+
+    @classmethod
+    def add_drive_image(cls, drive_id, seller_id):
+
+        if not db.session.query(db.exists().where(
+            cls.drive_id == drive_id
+        )).scalar():
+            print('Creating image', drive_id)
+            db.session.add(cls(drive_id=drive_id, seller_id=seller_id))
+            db.session.commit()
+
+        return db.session.query(cls).filter(
+            cls.drive_id == drive_id
+        ).first()

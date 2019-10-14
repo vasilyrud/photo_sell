@@ -9,3 +9,29 @@ class Seller(db.Model):
 
     def __repr__(self):
         return '<Seller: %r>' % self.id
+
+    @classmethod
+    def add_google_id(cls, google_id):
+
+        if not db.session.query(db.exists().where(
+            cls.google_id == google_id
+        )).scalar():
+            print('Creating user', google_id)
+            db.session.add(cls(google_id=google_id))
+            db.session.commit()
+
+        return db.session.query(cls).filter(
+            cls.google_id == google_id
+        ).first()
+
+    @classmethod
+    def add_stripe_id(cls, stripe_id, seller_id):
+
+        cur_seller = db.session.query(cls).filter(
+            cls.id == seller_id
+        ).first()
+
+        cur_seller.stripe_id = stripe_id
+        db.session.commit()
+
+        return cur_seller
