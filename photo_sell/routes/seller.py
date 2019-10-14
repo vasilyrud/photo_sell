@@ -11,6 +11,7 @@ from photo_sell.models.seller import Seller
 
 from photo_sell.routes.oauth import authorize_url, get_user_info, authenticate
 from photo_sell.routes.add_image_form import AddImageForm
+from photo_sell.routes.login_state import check_google_id, check_stripe_id, decide_state
 
 seller = flask.Blueprint('seller', __name__, template_folder='photo_sell.templates')
 
@@ -52,7 +53,7 @@ def google_auth():
     )
 
     if user_info is None:
-        return flask.redirect('/')
+        return flask.redirect(flask.url_for('home.index'))
 
     id_token_data = authenticate(
         flask.current_app.config['GOOGLE_LOGIN_URL'],
@@ -68,12 +69,11 @@ def google_auth():
     if cur_seller.stripe_id is not None:
         flask.session['stripe_id'] = cur_seller.stripe_id
 
-    return flask.redirect('/')
+    return flask.redirect(flask.url_for('home.index'))
 
 @seller.route('/stripe_connect')
+@check_google_id
 def stripe_connect():
-
-    # TODO: Disallow access to this URL
 
     auth_url = authorize_url(
         'stripe',
@@ -97,27 +97,25 @@ def stripe_auth():
     )
 
     if user_info is None:
-        return flask.redirect('/')
+        return flask.redirect(flask.url_for('home.index'))
 
     stripe_id = user_info['stripe_user_id']
 
     cur_seller = Seller.add_stripe_id(stripe_id, flask.session['seller_id'])
     flask.session['stripe_id'] = stripe_id
 
-    return flask.redirect('/')
+    return flask.redirect(flask.url_for('home.index'))
 
 @seller.route('/logout')
+@check_google_id
 def logout():
 
-    # TODO: Disallow access to this URL
-
     flask.session.clear()
-    return flask.redirect('/')
+    return flask.redirect(flask.url_for('home.index'))
 
 @seller.route('/add_image', methods=('GET', 'POST'))
+@check_stripe_id
 def add_image():
-
-    # TODO: Disallow access to this URL
 
     form = AddImageForm()
 
@@ -126,6 +124,6 @@ def add_image():
 
         cur_image = Image.add_drive_image(form.drive_id, flask.session['seller_id'])
 
-        return flask.redirect('/')
+        return flask.redirect(flask.url_for('home.index'))
 
     return flask.render_template('add.html', form=form)
