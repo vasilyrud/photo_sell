@@ -1,21 +1,23 @@
 <!doctype html>
 <title>Photo Sell - Add Image</title>
 
-<section class="content">
-    <p>Add Image</p>
+<html>
+    <body>
+        <p>Add Image</p>
 
-    <form method="POST" action="{{ url_for('seller.add_image') }}">
-        {{ form.hidden_tag() }}
-        {{ form.drive_url.label }} {{ form.drive_url(size=50) }}
+        <form method="POST" action="{{ url_for('seller.add_image') }}">
+            {{ form.hidden_tag() }}
+            {{ form.drive_url.label }} {{ form.drive_url(size=50) }}
 
-        <input type="submit" value="Add">
+            <input type="submit" value="Add">
 
-        {% if form.drive_url.errors %}
-            <ul class=errors>
-            {% for error in form.drive_url.errors %}
-                <li>{{ error }}</li>
-            {% endfor %}
-            </ul>
-        {% endif %}
-    </form>
-</section>
+            {% if form.drive_url.errors %}
+                <ul class=errors>
+                {% for error in form.drive_url.errors %}
+                    <li>{{ error }}</li>
+                {% endfor %}
+                </ul>
+            {% endif %}
+        </form>
+    </body>
+</html>

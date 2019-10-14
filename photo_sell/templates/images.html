@@ -1,0 +1,20 @@
+<!doctype html>
+<title>Photo Sell</title>
+
+<html>
+    <body>
+        <div>
+        {% block top_block %}{% endblock %}
+        </div>
+
+        <div>
+        {% if images %}
+            {% for image in images %}
+                <img style="margin:10px 0 0 10px;" src="{{ image }}" />
+            {% endfor %}
+        {% else %}
+            <p>No images to see yet</p>
+        {% endif %}
+        </div>
+    </body>
+</html>

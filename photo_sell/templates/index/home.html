@@ -1,5 +1,5 @@
-{% extends "layout.html" %}
+{% extends "images.html" %}
 
-{% block content %}
-    <a href="{{ url_for('seller.google_login') }}">Sign in (with Google)</a> to start selling
+{% block top_block %}
+    <a href="{{ url_for('seller.google_login') }}">Sign in (with Google)</a> to start selling.
 {% endblock %}

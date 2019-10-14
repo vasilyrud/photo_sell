@@ -15,7 +15,6 @@ class Image(db.Model):
         if not db.session.query(db.exists().where(
             cls.drive_id == drive_id
         )).scalar():
-            print('Creating image', drive_id)
             db.session.add(cls(drive_id=drive_id, seller_id=seller_id))
             db.session.commit()
 

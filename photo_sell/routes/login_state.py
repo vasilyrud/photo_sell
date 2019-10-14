@@ -1,12 +1,12 @@
 import functools
 import flask
 
-def decide_state():
+def decide_state(**kwargs):
     if 'google_id' in flask.session:
         if 'stripe_id' in flask.session:
-            return flask.render_template('index/seller.html')
-        return flask.render_template('index/connect.html')
-    return flask.render_template('index/home.html')
+            return flask.render_template('index/seller.html', **kwargs)
+        return flask.render_template('index/connect.html', **kwargs)
+    return flask.render_template('index/home.html', **kwargs)
 
 def check_google_id(f):
 

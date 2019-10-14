@@ -16,7 +16,6 @@ class Seller(db.Model):
         if not db.session.query(db.exists().where(
             cls.google_id == google_id
         )).scalar():
-            print('Creating user', google_id)
             db.session.add(cls(google_id=google_id))
             db.session.commit()
 

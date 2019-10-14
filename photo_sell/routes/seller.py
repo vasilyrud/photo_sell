@@ -1,9 +1,4 @@
-import io
 import flask
-
-from googleapiclient.discovery import build
-from googleapiclient.http import MediaIoBaseDownload
-from googleapiclient.errors import HttpError
 
 from photo_sell.models.db import db
 from photo_sell.models.image import Image
@@ -11,22 +6,9 @@ from photo_sell.models.seller import Seller
 
 from photo_sell.routes.oauth import authorize_url, get_user_info, authenticate, OAuthError
 from photo_sell.routes.add_image_form import AddImageForm
-from photo_sell.routes.login_state import check_google_id, check_stripe_id, decide_state
+from photo_sell.routes.login_state import check_google_id, check_stripe_id
 
 seller = flask.Blueprint('seller', __name__, template_folder='photo_sell.templates')
-
-def _download_image(drive_id):
-
-    service = build('drive', 'v3', developerKey=flask.current_app.config['GOOGLE_DRIVE_API_KEY'])
-    request = service.files().get_media(fileId=drive_id)
-
-    fh = io.BytesIO()
-    downloader = MediaIoBaseDownload(fh, request)
-
-    done = False
-    while done is False:
-        status, done = downloader.next_chunk()
-        print("Download %d%%." % int(status.progress() * 100))
 
 @seller.route('/google_login')
 def google_login():
@@ -117,8 +99,6 @@ def add_image():
     form = AddImageForm()
 
     if form.validate_on_submit():
-        print('Form submitted:', form.drive_url.data)
-
         cur_image = Image.add_drive_image(form.drive_id, flask.session['seller_id'])
 
         return flask.redirect(flask.url_for('home.index'))
