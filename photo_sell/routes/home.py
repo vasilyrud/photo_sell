@@ -30,7 +30,14 @@ def _download_image(drive_id):
         status, done = downloader.next_chunk()
         print("Download %d%%." % int(status.progress() * 100))
 
-@cache.memoize()
+@cache.memoize(timeout=10)
+def _get_latest_images():
+    return [
+        img.drive_id 
+        for img in db.session.query(Image).order_by(Image.id.desc()).limit(5)
+    ]
+
+@cache.memoize(timeout=60*24)
 def _download_thumbnail(drive_id):
 
     # TODO: Use Drive API to get thumbnail. If not possible,
@@ -46,10 +53,10 @@ def _download_thumbnail(drive_id):
 @home.route('/')
 def index():
 
-    latest_images = db.session.query(Image).order_by(Image.id.desc()).limit(5)
+    latest_images = _get_latest_images()
     image_data = [
-        _download_thumbnail(latest_image.drive_id) 
-        for latest_image in latest_images
+        _download_thumbnail(drive_id) 
+        for drive_id in latest_images
     ]
 
     return decide_state(images=image_data)
