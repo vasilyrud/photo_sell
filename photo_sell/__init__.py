@@ -12,6 +12,7 @@ def create_app(running_tests=False):
     if running_tests:
         app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///test.sqlite'
         app.config['TESTING'] = True
+        app.config['WTF_CSRF_ENABLED'] = False
 
     models.init_app(app, running_tests)
     routes.init_app(app, running_tests)
