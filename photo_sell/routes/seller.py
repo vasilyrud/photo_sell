@@ -9,7 +9,7 @@ from photo_sell.models.db import db
 from photo_sell.models.image import Image
 from photo_sell.models.seller import Seller
 
-from photo_sell.routes.oauth import authorize_url, get_user_info, authenticate
+from photo_sell.routes.oauth import authorize_url, get_user_info, authenticate, OAuthError
 from photo_sell.routes.add_image_form import AddImageForm
 from photo_sell.routes.login_state import check_google_id, check_stripe_id, decide_state
 
@@ -43,16 +43,14 @@ def google_login():
 @seller.route('/google_auth')
 def google_auth():
 
-    # TODO: Disallow access to this URL
-
-    user_info = get_user_info(
-        'google',
-        flask.current_app.config['GOOGLE_INFO_URL'],
-        flask.current_app.config['GOOGLE_CLIENT_SECRET'],
-        flask.current_app.config['GOOGLE_CLIENT_ID']
-    )
-
-    if user_info is None:
+    try:
+        user_info = get_user_info(
+            'google',
+            flask.current_app.config['GOOGLE_INFO_URL'],
+            flask.current_app.config['GOOGLE_CLIENT_SECRET'],
+            flask.current_app.config['GOOGLE_CLIENT_ID']
+        )
+    except OAuthError:
         return flask.redirect(flask.url_for('home.index'))
 
     id_token_data = authenticate(
@@ -85,18 +83,17 @@ def stripe_connect():
     return flask.redirect(auth_url)
 
 @seller.route('/stripe_auth')
+@check_google_id
 def stripe_auth():
 
-    # TODO: Disallow access to this URL
-
-    user_info = get_user_info(
-        'stripe',
-        flask.current_app.config['STRIPE_INFO_URL'],
-        flask.current_app.config['STRIPE_CLIENT_SECRET'],
-        flask.current_app.config['STRIPE_CLIENT_ID']
-    )
-
-    if user_info is None:
+    try:
+        user_info = get_user_info(
+            'stripe',
+            flask.current_app.config['STRIPE_INFO_URL'],
+            flask.current_app.config['STRIPE_CLIENT_SECRET'],
+            flask.current_app.config['STRIPE_CLIENT_ID']
+        )
+    except OAuthError:
         return flask.redirect(flask.url_for('home.index'))
 
     stripe_id = user_info['stripe_user_id']

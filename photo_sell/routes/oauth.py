@@ -4,6 +4,9 @@ import hashlib
 
 import flask
 
+class OAuthError(Exception):
+   pass
+
 def _make_redir_uri(service):
     return flask.current_app.config['REDIR_URI_BASE'] + '/' + service + '_auth'
 
@@ -27,8 +30,6 @@ def authorize_url(
     }
     params.update(kwargs)
 
-    print('authorize_url params:', params)
-
     req = requests.Request('GET', 
         auth_url,
         params=params
@@ -44,17 +45,11 @@ def get_user_info(
     **kwargs
 ):
     state = flask.request.args.get('state')
-    print('state:', state)
 
-    if flask.session[service + '_state'] != state:
-        print('ERROR: state mismatch')
-
-        # TODO: This redirect will not work
-        # TODO: Use `url_for` instead of '/'
-        flask.redirect('/')
+    if state is None or state != flask.session[service + '_state']:
+        raise OAuthError('State variable mismatch for ' + service + '_state')
 
     code = flask.request.args.get('code')
-    print('code:', code)
 
     data = {
         'grant_type': 'authorization_code',
@@ -71,10 +66,9 @@ def get_user_info(
     )
 
     resp_data = resp.json()
-    print(resp_data)
 
     if 'error' in resp_data:
-        return None
+        raise OAuthError('Error getting response for ' + service + ' login')
 
     return resp_data
 

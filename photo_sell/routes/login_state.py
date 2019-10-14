@@ -14,7 +14,7 @@ def check_google_id(f):
     def decorated_function(*args, **kwargs):
 
         if 'google_id' not in flask.session:
-            return flask.redirect('/')
+            return flask.redirect(flask.url_for('home.index'))
 
         return f(*args, **kwargs)
 
@@ -26,7 +26,7 @@ def check_stripe_id(f):
     def decorated_function(*args, **kwargs):
 
         if 'stripe_id' not in flask.session:
-            return flask.redirect('/')
+            return flask.redirect(flask.url_for('home.index'))
 
         return f(*args, **kwargs)
 
