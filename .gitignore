@@ -4,8 +4,10 @@
 __pycache__/
 .pytest_cache/
 .coverage
+**/*.pyc
 
 photo_sell/db.sqlite
+photo_sell/test.sqlite
 photo_sell/vars.py
 
 !*.gitkeep
