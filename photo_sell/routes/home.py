@@ -13,6 +13,7 @@ from photo_sell.models.image import Image
 from photo_sell.models.seller import Seller
 
 from photo_sell.routes.login_state import decide_state
+from photo_sell.routes.cache import cache
 
 home = flask.Blueprint('home', __name__, template_folder='photo_sell.templates')
 
@@ -29,12 +30,13 @@ def _download_image(drive_id):
         status, done = downloader.next_chunk()
         print("Download %d%%." % int(status.progress() * 100))
 
+@cache.memoize()
 def _download_thumbnail(drive_id):
 
     # TODO: Use Drive API to get thumbnail. If not possible,
     # download image and shrink manually.
 
-    thumbnail_url = 'https://drive.google.com/thumbnail?id=' + drive_id
+    thumbnail_url = flask.current_app.config['GOOGLE_DRIVE_THUMBNAIL_URL'] + drive_id
 
     image_bytes = requests.get(thumbnail_url).content
     image_type  = imghdr.what(None, image_bytes)
@@ -44,12 +46,10 @@ def _download_thumbnail(drive_id):
 @home.route('/')
 def index():
 
-    images = [
-        _download_thumbnail('0B4Edc2SFos9ANm1yU2Q0YVhEZ2c'),
-        _download_thumbnail('0B4Edc2SFos9ANm1yU2Q0YVhEZ2c'),
+    latest_images = db.session.query(Image).order_by(Image.id.desc()).limit(5)
+    image_data = [
+        _download_thumbnail(latest_image.drive_id) 
+        for latest_image in latest_images
     ]
 
-    for image in images:
-        print(image[:50])
-
-    return decide_state(images=images)
+    return decide_state(images=image_data)
