@@ -1,5 +1,7 @@
 {% extends "layout.html" %}
 
 {% block content %}
+    <a href="{{ url_for('seller.add_image') }}">Add image to sell</a>
+    <br>
     <a href="{{ url_for('seller.logout') }}">Sign out</a>
 {% endblock %}

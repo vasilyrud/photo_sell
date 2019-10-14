@@ -42,6 +42,21 @@ def _add_stripe_id(stripe_id):
 
     return cur_seller
 
+def _add_drive_image(drive_id):
+
+    # TODO: move to models
+
+    if not db.session.query(db.exists().where(
+        Image.drive_id == drive_id
+    )).scalar():
+        print('Creating image', drive_id)
+        db.session.add(Image(drive_id=drive_id, seller_id=flask.session['seller_id']))
+        db.session.commit()
+
+    return db.session.query(Image).filter(
+        Image.drive_id == drive_id
+    ).first()
+
 def _download_image(drive_id):
 
     service = build('drive', 'v3', developerKey=flask.current_app.config['GOOGLE_DRIVE_API_KEY'])
@@ -151,7 +166,9 @@ def add_image():
 
     if form.validate_on_submit():
         print('Form submitted:', form.drive_url.data)
-        # _parse_drive_url(form.drive_url.data)
-        # return flask.redirect('/')
+
+        cur_image = _add_drive_image(form.drive_id)
+
+        return flask.redirect('/')
 
     return flask.render_template('add.html', form=form)
