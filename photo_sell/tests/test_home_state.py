@@ -1,11 +1,13 @@
 import pytest
 
-def test_empty_images(client):
+from photo_sell.routes.home import _download_thumbnail
+
+def test_empty_images(client, const):
     rv = client.get('/')
 
     assert b'Sign in (with Google)' in rv.data
 
-def test_logged_in_google(client):
+def test_logged_in_google(client, const):
     with client.session_transaction() as sess:
         sess['google_id'] = 'abc'
 
@@ -13,7 +15,7 @@ def test_logged_in_google(client):
 
     assert b'Connect with Stripe' in rv.data
 
-def test_logged_in_stripe(client):
+def test_logged_in_stripe(client, const):
     with client.session_transaction() as sess:
         sess['google_id'] = 'abc'
         sess['stripe_id'] = 'def'
@@ -22,7 +24,7 @@ def test_logged_in_stripe(client):
 
     assert b'Add image to sell' in rv.data
 
-def test_login_access(client):
+def test_login_access(client, const):
     rv = client.get('/stripe_connect', follow_redirects=True)
     assert b'Sign in (with Google)' in rv.data
 
@@ -37,3 +39,8 @@ def test_login_access(client):
 
     rv = client.get('/add_image', follow_redirects=True)
     assert b'Connect with Stripe' in rv.data
+
+def test_download_thumbnail(client, const):
+    thumbnail_image_data = _download_thumbnail(const['VALID_DRIVE_ID'])
+
+    assert 'data:image/png;base64,' in thumbnail_image_data
