@@ -1,5 +1,9 @@
 import pytest
 
+from photo_sell.models.db import db
+from photo_sell.models.image import Image
+from photo_sell.models.seller import Seller
+
 from photo_sell.routes.add_image_form import AddImageForm
 
 VALID_SUBURLS = [
@@ -66,3 +70,40 @@ def test_parse_drive_url_does_not_exist(client):
     form = AddImageForm()
 
     assert not form._drive_image_exists(28 * 'a')
+
+def _create_seller(client, google_id, stripe_id):
+    seller = Seller.add_google_id(google_id)
+    seller = Seller.add_stripe_id(stripe_id, seller.id)
+
+    with client.session_transaction() as sess:
+        sess['google_id'] = seller.google_id
+        sess['stripe_id'] = seller.stripe_id
+        sess['seller_id'] = seller.id
+
+    return seller
+
+def test_form_submit(client):
+    _create_seller(client, 'abc', 'def')
+
+    rv = client.get('/add_image')
+    assert b'<form' in rv.data and b'Add Image' in rv.data
+
+    with client.session_transaction() as sess:
+        response = client.post('/add_image', data={
+            'drive_url': VALID_SUBURLS[0] + VALID_DRIVE_ID
+        }, follow_redirects=True)
+
+    assert b'Add image to sell' in response.data
+
+def test_form_submit_error(client):
+    _create_seller(client, 'abc', 'def')
+
+    rv = client.get('/add_image')
+    assert b'<form' in rv.data and b'Add Image' in rv.data
+
+    with client.session_transaction() as sess:
+        response = client.post('/add_image', data={
+            'drive_url': 'not valid'
+        }, follow_redirects=True)
+
+    assert b'Invalid Google Drive URL provided' in response.data
