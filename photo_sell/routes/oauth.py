@@ -45,11 +45,12 @@ def get_user_info(
     **kwargs
 ):
     state = flask.request.args.get('state')
-
     if state is None or state != flask.session[service + '_state']:
         raise OAuthError('State variable mismatch for ' + service + '_state')
 
     code = flask.request.args.get('code')
+    if code is None:
+        raise OAuthError('"code" not present in request')
 
     data = {
         'grant_type': 'authorization_code',
@@ -66,7 +67,6 @@ def get_user_info(
     )
 
     resp_data = resp.json()
-
     if 'error' in resp_data:
         raise OAuthError('Error getting response for ' + service + ' login')
 
@@ -89,6 +89,4 @@ def authenticate(
         params=params
     )
 
-    id_token_data = validate_id_token.json()
-
-    return id_token_data
+    return validate_id_token.json()

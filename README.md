@@ -14,3 +14,9 @@ To run the app:
 export FLASK_APP=photo_sell
 flask run
 ```
+
+## To run tests 
+
+```
+python -m pytest
+```
