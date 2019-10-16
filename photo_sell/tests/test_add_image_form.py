@@ -87,6 +87,9 @@ def test_form_submit(client, const):
         }, follow_redirects=True)
 
     assert b'Add image to sell' in response.data
+    assert db.session.query(db.exists().where(
+        Image.drive_id == const['VALID_DRIVE_ID']
+    )).scalar()
 
 def test_form_submit_error(client, const):
     _create_seller(client, 'abc', 'def')
@@ -94,9 +97,14 @@ def test_form_submit_error(client, const):
     rv = client.get('/add_image')
     assert b'<form' in rv.data and b'Add Image' in rv.data
 
+    INVALID_DRIVE_ID = 'not valid'
+
     with client.session_transaction() as sess:
         response = client.post('/add_image', data={
-            'drive_url': 'not valid'
+            'drive_url': INVALID_DRIVE_ID
         }, follow_redirects=True)
 
     assert b'Invalid Google Drive URL provided' in response.data
+    assert not db.session.query(db.exists().where(
+        Image.drive_id == INVALID_DRIVE_ID
+    )).scalar()

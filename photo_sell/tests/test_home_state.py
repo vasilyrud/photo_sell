@@ -55,3 +55,14 @@ def test_get_latest_images(client, const):
 
     assert len(latest_images) == 2
     assert const['VALID_DRIVE_ID'] in latest_images
+
+def test_logout(client, const):
+    with client.session_transaction() as sess:
+        sess['google_id'] = 'abc'
+        sess['stripe_id'] = 'def'
+
+    rv = client.get('/logout', follow_redirects=True)
+
+    with client.session_transaction() as sess:
+        assert 'google_id' not in sess
+        assert 'stripe_id' not in sess
