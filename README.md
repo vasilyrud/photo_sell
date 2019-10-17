@@ -8,7 +8,13 @@ To run the app:
 
 2. Enable test mode in Google and Stripe to allow `redirect_uri` to go to localhost.
 
-3. Start the development flask server:
+3. Install dependencies:
+
+```
+pip install -e ./photo_sell
+```
+
+4. Start the development flask server:
 
 ```
 export FLASK_APP=photo_sell
