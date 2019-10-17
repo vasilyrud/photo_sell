@@ -9,5 +9,6 @@ __pycache__/
 photo_sell/db.sqlite
 photo_sell/test.sqlite
 photo_sell/vars.py
+photo_sell/photo_sell.egg-info
 
 !*.gitkeep
