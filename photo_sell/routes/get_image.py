@@ -15,6 +15,12 @@ from googleapiclient.errors import HttpError
 from photo_sell.routes.cache import cache
 
 def download_image(drive_id):
+    ''' Downloads entire Google Drive image, at original size.
+
+    Args:
+        drive_id: Google Drive image file ID (assumes it has 
+            been verified)
+    '''
 
     service = build('drive', 'v3', developerKey=flask.current_app.config['GOOGLE_DRIVE_API_KEY'])
     request = service.files().get_media(fileId=drive_id)
@@ -28,6 +34,9 @@ def download_image(drive_id):
 
 @cache.memoize(timeout=10)
 def get_latest_images():
+    ''' Fetches Drive IDs of latest 5 images added to DB.
+    '''
+
     return [
         img.drive_id 
         for img in db.session.query(Image).order_by(Image.id.desc()).limit(5)
@@ -35,6 +44,12 @@ def get_latest_images():
 
 @cache.memoize(timeout=60*24)
 def download_thumbnail(drive_id):
+    ''' Downloads only the thumbnail of a Google Drive image.
+
+    Args:
+        drive_id: Google Drive image file ID (assumes it has 
+            been verified)
+    '''
 
     # TODO: Use Drive API to get thumbnail. If not possible,
     # download image and shrink manually.

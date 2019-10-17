@@ -1,6 +1,15 @@
 from photo_sell.models.db import db
 
 class Seller(db.Model):
+    ''' Owner of images, who intends to sell them.
+
+    Columns:
+        id: Our own ID for the seller.
+        google_id: Google's ID for the user.
+        stripe_id: Stripe's ID for the user.
+        images: Images they are selling.
+    '''
+
     id = db.Column(db.Integer, primary_key=True)
     google_id = db.Column(db.String, unique=True, nullable=False)
     stripe_id = db.Column(db.String, unique=True, nullable=True)
@@ -12,6 +21,9 @@ class Seller(db.Model):
 
     @classmethod
     def add_google_id(cls, google_id):
+        ''' Return Seller with the given google_id, and
+        generate new Seller, if none exists yet.
+        '''
 
         if not db.session.query(db.exists().where(
             cls.google_id == google_id
@@ -25,6 +37,9 @@ class Seller(db.Model):
 
     @classmethod
     def add_stripe_id(cls, stripe_id, seller_id):
+        ''' Return seller with the given ID, and
+        link the Stripe ID to them in the database.
+        '''
 
         cur_seller = db.session.query(cls).filter(
             cls.id == seller_id

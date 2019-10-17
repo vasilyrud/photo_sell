@@ -1,6 +1,15 @@
 from photo_sell.models.db import db
 
 class Image(db.Model):
+    ''' Single Image in the database. Each seller 
+    owns multiple images.
+
+    Columns:
+        id: Our own ID for the image.
+        drive_id: Google Drive ID for the image file.
+        seller_id: Image owner.
+    '''
+
     id = db.Column(db.Integer, primary_key=True)
     drive_id = db.Column(db.String, unique=True, nullable=False)
 
@@ -11,6 +20,10 @@ class Image(db.Model):
 
     @classmethod
     def add_drive_image(cls, drive_id, seller_id):
+        ''' Add the given image to the database,
+        unless it is already being sold by someone 
+        else.
+        '''
 
         if not db.session.query(db.exists().where(
             cls.drive_id == drive_id

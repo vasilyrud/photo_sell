@@ -17,6 +17,17 @@ def authorize_url(
     client_id,
     **kwargs
 ):
+    ''' Returns a URL that can be used to initiate authorization
+    with `service`.
+
+    Args:
+        service: Name of service (used to correlate `state` 
+            in the cookie with server's own state). Should be
+            same when calling `authorize_url` and `get_user_info`.
+        auth_url: The OAuth v2 authorize URL of the service.
+        scope: Scope specific to the authorization request.
+        client_id: Our client ID registered with the service.
+    '''
 
     state = hashlib.sha256(os.urandom(1024)).hexdigest()
     flask.session[service + '_state'] = state
@@ -44,6 +55,18 @@ def get_user_info(
     client_id,
     **kwargs
 ):
+    ''' Get token from service after receiving authorization.
+
+    Args:
+        service: Must be same as in the `authorize_url` call.
+        info_url: a.k.a. the "token" URL.
+        client_secret: Our secret, registered with the service.
+        client_id: Our client ID registered with the service.
+    
+    Returns:
+        Parsed json data from the info_url.
+    '''
+
     state = flask.request.args.get('state')
     if state is None or state != flask.session[service + '_state']:
         raise OAuthError('State variable mismatch for ' + service + '_state')
@@ -77,6 +100,18 @@ def authenticate(
     user_info,
     **kwargs
 ):
+    ''' Perform verification of token for the purpose
+    of authenticating the user.
+
+    Args:
+        auth_url: URL that can perform authentication.
+        user_info: Information returned by `get_user_info`.
+
+    Returns:
+        Parsed json data from authentication server,
+        including the ID of the Google user.
+    '''
+
     access_token = user_info['access_token']
 
     params = {

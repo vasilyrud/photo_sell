@@ -8,6 +8,16 @@ from wtforms import StringField
 from wtforms.validators import DataRequired, ValidationError
 
 class AddImageForm(FlaskForm):
+    ''' Takes image that the seller wants to sell.
+    Rejects non-URL inputs.
+
+    Fields:
+        drive_url: The URL to the Google Drive image.
+    
+    Attributes:
+        drive_id: Only the unique id of the image used
+            to identify it in Google Drive.
+    '''
 
     drive_url = StringField(label='Drive URL', validators=[DataRequired()])
 
@@ -63,6 +73,9 @@ class AddImageForm(FlaskForm):
         return True
 
     def validate_drive_url(self, field):
+        ''' Confirms that the URL points to a valid
+        Google Drive image.
+        '''
 
         drive_id = self._parse_drive_url(field.data)
 
