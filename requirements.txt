@@ -1,0 +1,8 @@
+pytest
+Flask
+Flask-SQLAlchemy
+google-api-python-client
+Flask-WTF
+WTForms
+requests
+Flask-Caching

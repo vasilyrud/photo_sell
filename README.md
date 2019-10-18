@@ -11,7 +11,7 @@ Project to experiment with making a simple image sale service. While starting an
 3. Install dependencies:
 
 ```
-pip install -e ./photo_sell
+pip install -r requirements.txt
 ```
 
 4. Start the development flask server:
